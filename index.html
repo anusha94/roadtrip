@@ -134,6 +134,7 @@
   <div id="legend">
     <div class="legend-item"><div class="legend-dot planned"></div> Planned</div>
     <div class="legend-item"><div class="legend-dot backup"></div> Backup</div>
+    <div class="legend-item"><div style="width:18px;height:2px;border-top:2px dashed #8e8e93;"></div> Direct</div>
   </div>
 </div>
 
@@ -233,6 +234,49 @@
 
   L.polyline(routePoints, { color: '#007AFF', weight: 4, opacity: 0.75 }).addTo(map);
 
+  // ── Crow-flies line ───────────────────────────────────────────────────
+  const START = { lat: 52.359, lon: 4.617 };
+  const END   = { lat: 48.079, lon: 7.359 };
+  const COS_LAT = Math.cos((START.lat + END.lat) / 2 * Math.PI / 180);
+  const KM_LAT  = 111.0;
+  const KM_LON  = 111.0 * COS_LAT;
+
+  L.polyline([[START.lat, START.lon], [END.lat, END.lon]], {
+    color: '#8e8e93', weight: 2, opacity: 0.6,
+    dashArray: '8 6'
+  }).addTo(map).bindTooltip('Direct route', { permanent: false, direction: 'center' });
+
+  // ── Deviation helpers ─────────────────────────────────────────────────
+  // Returns { km: number, foot: {lat, lon} } — perpendicular distance from
+  // point P to the segment A→B (crow-flies line), plus the foot point.
+  function deviationFromLine(pLat, pLon) {
+    const ax = 0, ay = 0;
+    const bx = (END.lon - START.lon) * KM_LON;
+    const by = (END.lat - START.lat) * KM_LAT;
+    const px = (pLon   - START.lon) * KM_LON;
+    const py = (pLat   - START.lat) * KM_LAT;
+
+    const abLen2 = bx * bx + by * by;
+    const t = Math.max(0, Math.min(1, (px * bx + py * by) / abLen2));
+    const fx = t * bx, fy = t * by;             // foot in km space
+
+    const dx = px - fx, dy = py - fy;
+    const km = Math.round(Math.sqrt(dx * dx + dy * dy));
+
+    const footLat = START.lat + fy / KM_LAT;
+    const footLon = START.lon + fx / KM_LON;
+    return { km, foot: { lat: footLat, lon: footLon } };
+  }
+
+  // Pre-compute deviations and draw drop lines for planned stops
+  plannedStops.forEach(stop => {
+    const { km, foot } = deviationFromLine(stop.lat, stop.lon);
+    stop.deviation = km;
+    L.polyline([[stop.lat, stop.lon], [foot.lat, foot.lon]], {
+      color: '#34C759', weight: 1.5, opacity: 0.7, dashArray: '4 4'
+    }).addTo(map);
+  });
+
   // ── Icons ─────────────────────────────────────────────────────────────
 
   function makeIcon(html, size) {
@@ -271,6 +315,7 @@
         <div class="popup-name">${stop.name}</div>
         <div class="popup-road">${stop.road}</div>
         ${stop.time ? `<div class="popup-road" style="color:#007AFF;font-weight:600;">${stop.time}</div>` : ''}
+        ${stop.deviation != null ? `<div class="popup-road" style="color:#8e8e93;">↗ ${stop.deviation} km off direct path</div>` : ''}
         <div class="popup-facilities">${stop.facilities}</div>
         ${navLinks(stop)}
       </div>`;
@@ -309,6 +354,7 @@
           <div class="stop-card-name">${stop.name}</div>
           <div class="stop-card-sub">${stop.road}</div>
           ${stop.time ? `<div class="stop-card-sub" style="color:#007AFF;font-weight:600;">${stop.time}</div>` : ''}
+          ${stop.deviation != null ? `<div class="stop-card-sub" style="color:#8e8e93;">↗ ${stop.deviation} km off direct path</div>` : ''}
           <div class="stop-card-sub">${stop.facilities}</div>
           <div class="stop-card-nav">
             <a href="${wazeUrl}" target="_blank" style="background:#09CBE5;color:white;" class="nav-btn">Waze</a>
