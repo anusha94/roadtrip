@@ -132,9 +132,8 @@
     <p>Heemstede → Colmar · 11 Mar</p>
   </div>
   <div id="legend">
-    <div class="legend-item"><div class="legend-dot planned"></div> Planned</div>
+    <div class="legend-item"><div class="legend-dot planned"></div> Feeding</div>
     <div class="legend-item"><div class="legend-dot backup"></div> Backup</div>
-    <div class="legend-item"><div style="width:18px;height:2px;border-top:2px dashed #8e8e93;"></div> Direct</div>
   </div>
 </div>
 
@@ -232,48 +231,68 @@
   }).addTo(map);
   L.control.zoom({ position: 'topright' }).addTo(map);
 
-  L.polyline(routePoints, { color: '#007AFF', weight: 4, opacity: 0.75 }).addTo(map);
+  // ── Fastest direct route (OSRM) ───────────────────────────────────────
+  // Real driving route Heemstede → Colmar: 685km, ~7.5h
+  // Goes via Venlo/Rhine valley — more westerly than our A3/Frankfurt route
+  const directRoute = [
+    [52.359, 4.617], [52.372, 4.711], [52.309, 4.822], [52.283, 4.950],
+    [52.163, 4.989], [52.088, 5.075], [51.992, 5.081], [51.856, 5.226],
+    [51.912, 5.488], [51.870, 5.502], [51.874, 5.651], [51.843, 5.777],
+    [51.517, 6.005], [51.414, 6.123], [51.365, 6.125], [51.266, 6.358],
+    [51.102, 6.424], [51.056, 6.499], [51.032, 6.470], [50.928, 6.669],
+    [50.648, 6.934], [50.572, 7.137], [50.506, 7.221], [50.394, 7.248],
+    [50.390, 7.368], [50.341, 7.509], [50.234, 7.515], [50.192, 7.587],
+    [50.091, 7.605], [49.999, 7.684], [49.924, 7.830], [49.927, 7.940],
+    [49.880, 7.951], [49.782, 8.106], [49.715, 8.139], [49.650, 8.289],
+    [49.444, 8.322], [49.299, 8.152], [49.032, 8.204], [48.852, 8.052],
+    [48.720, 7.880], [48.679, 7.804], [48.667, 7.678], [48.580, 7.582],
+    [48.511, 7.582], [48.418, 7.484], [48.331, 7.498], [48.255, 7.413],
+    [48.079, 7.360]
+  ];
 
-  // ── Crow-flies line ───────────────────────────────────────────────────
-  const START = { lat: 52.359, lon: 4.617 };
-  const END   = { lat: 48.079, lon: 7.359 };
-  const COS_LAT = Math.cos((START.lat + END.lat) / 2 * Math.PI / 180);
-  const KM_LAT  = 111.0;
-  const KM_LON  = 111.0 * COS_LAT;
+  L.polyline(directRoute, {
+    color: '#007AFF', weight: 4, opacity: 0.85
+  }).addTo(map).bindTooltip('Fastest direct route (685km · 7.5h)', { sticky: true });
 
-  L.polyline([[START.lat, START.lon], [END.lat, END.lon]], {
-    color: '#8e8e93', weight: 2, opacity: 0.6,
-    dashArray: '8 6'
-  }).addTo(map).bindTooltip('Direct route', { permanent: false, direction: 'center' });
+  // ── Deviation from direct route polyline ──────────────────────────────
+  const KM_LAT = 111.0;
 
-  // ── Deviation helpers ─────────────────────────────────────────────────
-  // Returns { km: number, foot: {lat, lon} } — perpendicular distance from
-  // point P to the segment A→B (crow-flies line), plus the foot point.
-  function deviationFromLine(pLat, pLon) {
+  // Distance from point P to segment AB, returns { km, foot }
+  function pointToSegment(pLat, pLon, aLat, aLon, bLat, bLon) {
+    const cosLat = Math.cos((pLat + aLat) / 2 * Math.PI / 180);
+    const KM_LON = 111.0 * cosLat;
     const ax = 0, ay = 0;
-    const bx = (END.lon - START.lon) * KM_LON;
-    const by = (END.lat - START.lat) * KM_LAT;
-    const px = (pLon   - START.lon) * KM_LON;
-    const py = (pLat   - START.lat) * KM_LAT;
-
-    const abLen2 = bx * bx + by * by;
-    const t = Math.max(0, Math.min(1, (px * bx + py * by) / abLen2));
-    const fx = t * bx, fy = t * by;             // foot in km space
-
+    const bx = (bLon - aLon) * KM_LON, by = (bLat - aLat) * KM_LAT;
+    const px = (pLon - aLon) * KM_LON, py = (pLat - aLat) * KM_LAT;
+    const len2 = bx * bx + by * by;
+    const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, (px * bx + py * by) / len2));
+    const fx = t * bx, fy = t * by;
     const dx = px - fx, dy = py - fy;
-    const km = Math.round(Math.sqrt(dx * dx + dy * dy));
-
-    const footLat = START.lat + fy / KM_LAT;
-    const footLon = START.lon + fx / KM_LON;
-    return { km, foot: { lat: footLat, lon: footLon } };
+    return {
+      km: Math.sqrt(dx * dx + dy * dy),
+      foot: { lat: aLat + fy / KM_LAT, lon: aLon + fx / (111.0 * Math.cos(aLat * Math.PI / 180)) }
+    };
   }
 
-  // Pre-compute deviations and draw drop lines for planned stops
-  plannedStops.forEach(stop => {
-    const { km, foot } = deviationFromLine(stop.lat, stop.lon);
+  // Minimum distance from point to any segment of the direct route polyline
+  function deviationFromRoute(pLat, pLon) {
+    let best = { km: Infinity, foot: null };
+    for (let i = 0; i < directRoute.length - 1; i++) {
+      const [aLat, aLon] = directRoute[i];
+      const [bLat, bLon] = directRoute[i + 1];
+      const r = pointToSegment(pLat, pLon, aLat, aLon, bLat, bLon);
+      if (r.km < best.km) best = r;
+    }
+    return { km: Math.round(best.km), foot: best.foot };
+  }
+
+  // Pre-compute deviations and draw drop lines for all stops
+  allStops.forEach(stop => {
+    const { km, foot } = deviationFromRoute(stop.lat, stop.lon);
     stop.deviation = km;
+    const color = stop.type === 'planned' ? '#34C759' : '#FF9500';
     L.polyline([[stop.lat, stop.lon], [foot.lat, foot.lon]], {
-      color: '#34C759', weight: 1.5, opacity: 0.7, dashArray: '4 4'
+      color, weight: 1.5, opacity: 0.7, dashArray: '4 4'
     }).addTo(map);
   });
 
