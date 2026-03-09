@@ -159,6 +159,7 @@
       name: "Ohligser Heide West",
       road: "A3, km 113 · near Leverkusen",
       facilities: "Petrol · Restaurant · Changing room · Toilet",
+      time: "Stop 1 · ~11:00am",
       lat: 51.072, lon: 7.003,
       type: "planned"
     },
@@ -166,7 +167,16 @@
       name: "Bergstraße West",
       road: "A5 · near Bensheim (64625)",
       facilities: "Petrol · Restaurant · Changing room · EV charging",
+      time: "Stop 2 · ~1:45pm",
       lat: 49.680, lon: 8.618,
+      type: "planned"
+    },
+    {
+      name: "Baden-Baden",
+      road: "A5, km 281 · Baden-Baden",
+      facilities: "Petrol · Restaurant · Hotel · Toilet",
+      time: "Stop 3 · ~4:00pm (skip if baby is happy)",
+      lat: 48.762, lon: 8.242,
       type: "planned"
     }
   ];
@@ -186,7 +196,6 @@
     // After Stop 2
     { name: "Hardtwald",        road: "A5, km 208", facilities: "Petrol · Restaurant · Toilet",       lat: 49.158, lon: 8.418, type: "backup" },
     { name: "Bruchsal",         road: "A5, km 230", facilities: "Petrol · Restaurant · Toilet",       lat: 49.098, lon: 8.522, type: "backup" },
-    { name: "Baden-Baden",      road: "A5, km 281", facilities: "Petrol · Restaurant · Hotel",        lat: 48.762, lon: 8.242, type: "backup" },
     { name: "Mahlberg",         road: "A5, km 346", facilities: "Petrol · Restaurant · EV charging",  lat: 48.288, lon: 7.818, type: "backup" },
     { name: "Schauinsland West",road: "A5, km 376 · near Freiburg (79108)", facilities: "Parking · Petrol · Toilet", lat: 48.040, lon: 7.840, type: "backup" },
   ];
@@ -261,6 +270,7 @@
         <span class="popup-badge ${stop.type}">${stop.type === 'planned' ? 'Planned stop' : 'Backup stop'}</span>
         <div class="popup-name">${stop.name}</div>
         <div class="popup-road">${stop.road}</div>
+        ${stop.time ? `<div class="popup-road" style="color:#007AFF;font-weight:600;">${stop.time}</div>` : ''}
         <div class="popup-facilities">${stop.facilities}</div>
         ${navLinks(stop)}
       </div>`;
@@ -298,6 +308,7 @@
         <div style="flex:1">
           <div class="stop-card-name">${stop.name}</div>
           <div class="stop-card-sub">${stop.road}</div>
+          ${stop.time ? `<div class="stop-card-sub" style="color:#007AFF;font-weight:600;">${stop.time}</div>` : ''}
           <div class="stop-card-sub">${stop.facilities}</div>
           <div class="stop-card-nav">
             <a href="${wazeUrl}" target="_blank" style="background:#09CBE5;color:white;" class="nav-btn">Waze</a>
