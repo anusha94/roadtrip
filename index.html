@@ -156,48 +156,43 @@
 
   const plannedStops = [
     {
-      name: "Ohligser Heide West",
-      road: "A3, km 113 · near Leverkusen",
-      facilities: "Petrol · Restaurant · Changing room · Toilet",
-      time: "Stop 1 · ~11:00am",
-      lat: 51.072, lon: 7.003,
+      name: "De Wuust (La Place)",
+      road: "A73 · 5808 PA Oirlo",
+      facilities: "La Place restaurant · Baby changing · Petrol · Toilet",
+      time: "Stop 1 · ~10:45am",
+      lat: 51.505, lon: 6.022,
       type: "planned"
     },
     {
-      name: "Bergstraße West",
-      road: "A5 · near Bensheim (64625)",
-      facilities: "Petrol · Restaurant · Changing room · EV charging",
-      time: "Stop 2 · ~1:45pm",
-      lat: 49.680, lon: 8.618,
+      name: "Brohltal West (Serways)",
+      road: "A61 · 56651 Niederzissen",
+      facilities: "Restaurant · Burger King · Baby changing · Shower · EV charging",
+      time: "Stop 2 · ~1:30pm",
+      lat: 50.440, lon: 7.223,
       type: "planned"
     },
     {
-      name: "Baden-Baden",
-      road: "A5, km 281 · Baden-Baden",
-      facilities: "Petrol · Restaurant · Hotel · Toilet",
-      time: "Stop 3 · ~4:00pm (skip if baby is happy)",
-      lat: 48.762, lon: 8.242,
+      name: "Wonnegau West (Serways)",
+      road: "A61, km 340 · 67551 Worms",
+      facilities: "Restaurant · Petrol · Baby changing · EV charging · 24h",
+      time: "Stop 3 · ~3:30pm",
+      lat: 49.646, lon: 8.293,
       type: "planned"
     }
   ];
 
   const backupStops = [
-    // Before Stop 1
-    { name: "Hünxe West",       road: "A3, km 52",  facilities: "Petrol · Restaurant · Hotel",        lat: 51.582, lon: 6.742, type: "backup" },
-    // Between Stop 1 and Stop 2
-    { name: "Königsforst West", road: "A3, km 148", facilities: "Parking · Restaurant",               lat: 50.910, lon: 7.175, type: "backup" },
-    { name: "Siegburg West",    road: "A3, km 160", facilities: "Petrol · Restaurant · Toilet",       lat: 50.800, lon: 7.203, type: "backup" },
-    { name: "Fernthal West",    road: "A3, km 191", facilities: "Petrol · Restaurant · Hotel",        lat: 50.608, lon: 7.490, type: "backup" },
-    { name: "Heiligenroth",     road: "A3, km 229", facilities: "Petrol · Restaurant · Hotel",        lat: 50.437, lon: 7.683, type: "backup" },
-    { name: "Bad Camberg West", road: "A3, km 263", facilities: "Petrol · Restaurant · Toilet",       lat: 50.300, lon: 8.275, type: "backup" },
-    { name: "Medenbach West",   road: "A3, km 289", facilities: "Petrol · Restaurant · Toilet",       lat: 50.130, lon: 8.530, type: "backup" },
-    { name: "Taunusblick",      road: "A5 · near Frankfurt", facilities: "Petrol · Restaurant · Toilet", lat: 50.143, lon: 8.572, type: "backup" },
-    { name: "Gräfenhausen",     road: "A5",         facilities: "Petrol · Restaurant · EV charging",  lat: 49.965, lon: 8.625, type: "backup" },
-    // After Stop 2
-    { name: "Hardtwald",        road: "A5, km 208", facilities: "Petrol · Restaurant · Toilet",       lat: 49.158, lon: 8.418, type: "backup" },
-    { name: "Bruchsal",         road: "A5, km 230", facilities: "Petrol · Restaurant · Toilet",       lat: 49.098, lon: 8.522, type: "backup" },
-    { name: "Mahlberg",         road: "A5, km 346", facilities: "Petrol · Restaurant · EV charging",  lat: 48.288, lon: 7.818, type: "backup" },
-    { name: "Schauinsland West",road: "A5, km 376 · near Freiburg (79108)", facilities: "Parking · Petrol · Toilet", lat: 48.040, lon: 7.840, type: "backup" },
+    // Netherlands: Heemstede → Venlo
+    { name: "De Schaars (Shell)",     road: "A12/A50 · Arnhem",           facilities: "Petrol · Shop · Toilet",                     lat: 52.025, lon: 5.879, type: "backup" },
+    { name: "Hondsiep (Shell)",       road: "A73 · 5443 ZG Haps",         facilities: "Petrol · EV charging · Toilet",               lat: 51.670, lon: 5.855, type: "backup" },
+    { name: "Spik (BP)",              road: "A73 · 6042 WZ Roermond",     facilities: "BP · Wild Bean Cafe · EV charging · Toilet",  lat: 51.192, lon: 6.031, type: "backup" },
+    // Germany: A61 Venlo → Landau
+    { name: "Bedburger Land West",    road: "A61 · 50181 Bedburg",        facilities: "McDonald's · Petrol · Toilet",                lat: 51.005, lon: 6.519, type: "backup" },
+    { name: "Moseltal West (Serways)",road: "A61 · 56333 Winningen",      facilities: "Coffee Fellows · Toilet · EV charging",       lat: 50.310, lon: 7.570, type: "backup" },
+    { name: "Hunsrück West (Serways)",road: "A61 · 55442 Daxweiler",      facilities: "Restaurant · Playground · Baby changing",     lat: 49.990, lon: 7.650, type: "backup" },
+    { name: "Dannstadt Ost",          road: "A61 · 67125 Dannstadt",      facilities: "Petrol · Food · Toilet · EV charging",        lat: 49.410, lon: 8.342, type: "backup" },
+    // France: Landau → Colmar
+    { name: "McDonald's Mulhouse",    road: "A35 · Mulhouse",             facilities: "McDonald's · Baby changing · Toilet · Seating", lat: 47.750, lon: 7.340, type: "backup" },
   ];
 
   const allStops = [...plannedStops, ...backupStops];
@@ -231,28 +226,27 @@
   }).addTo(map);
   L.control.zoom({ position: 'topright' }).addTo(map);
 
-  // ── Fastest direct route (OSRM) ───────────────────────────────────────
-  // Real driving route Heemstede → Colmar: 685km, ~7.5h
-  // Goes via Venlo/Rhine valley — more westerly than our A3/Frankfurt route
+  // ── Google Maps route ──────────────────────────────────────────────────
+  // Heemstede → Arnhem → Nijmegen → Venlo → A61 → Landau → Strasbourg → Colmar: 710km
   const directRoute = [
-    [52.359, 4.617], [52.372, 4.711], [52.309, 4.822], [52.283, 4.950],
-    [52.163, 4.989], [52.088, 5.075], [51.992, 5.081], [51.856, 5.226],
-    [51.912, 5.488], [51.870, 5.502], [51.874, 5.651], [51.843, 5.777],
-    [51.517, 6.005], [51.414, 6.123], [51.365, 6.125], [51.266, 6.358],
-    [51.102, 6.424], [51.056, 6.499], [51.032, 6.470], [50.928, 6.669],
-    [50.648, 6.934], [50.572, 7.137], [50.506, 7.221], [50.394, 7.248],
-    [50.390, 7.368], [50.341, 7.509], [50.234, 7.515], [50.192, 7.587],
-    [50.091, 7.605], [49.999, 7.684], [49.924, 7.830], [49.927, 7.940],
-    [49.880, 7.951], [49.782, 8.106], [49.715, 8.139], [49.650, 8.289],
-    [49.444, 8.322], [49.299, 8.152], [49.032, 8.204], [48.852, 8.052],
-    [48.720, 7.880], [48.679, 7.804], [48.667, 7.678], [48.580, 7.582],
-    [48.511, 7.582], [48.418, 7.484], [48.331, 7.498], [48.255, 7.413],
-    [48.079, 7.360]
+    [52.360, 4.606], [52.372, 4.711], [52.309, 4.822], [52.284, 4.949],
+    [52.063, 5.067], [52.065, 5.362], [52.015, 5.649], [52.022, 5.803],
+    [51.985, 5.899], [51.843, 5.865], [51.736, 5.845], [51.385, 6.121],
+    [51.370, 6.168], [51.306, 6.231], [51.268, 6.356], [51.102, 6.424],
+    [51.056, 6.499], [51.032, 6.469], [50.928, 6.669], [50.650, 6.931],
+    [50.572, 7.137], [50.505, 7.222], [50.395, 7.246], [50.390, 7.368],
+    [50.340, 7.509], [50.234, 7.515], [50.192, 7.587], [50.091, 7.605],
+    [49.999, 7.684], [49.924, 7.830], [49.928, 7.939], [49.880, 7.951],
+    [49.782, 8.106], [49.715, 8.139], [49.655, 8.286], [49.444, 8.322],
+    [49.367, 8.201], [49.200, 8.116], [49.089, 8.213], [49.032, 8.204],
+    [48.749, 7.919], [48.681, 7.808], [48.675, 7.733], [48.573, 7.752],
+    [48.528, 7.689], [48.520, 7.581], [48.453, 7.508], [48.331, 7.498],
+    [48.253, 7.413], [48.075, 7.366]
   ];
 
   L.polyline(directRoute, {
     color: '#007AFF', weight: 4, opacity: 0.85
-  }).addTo(map).bindTooltip('Fastest direct route (685km · 7.5h)', { sticky: true });
+  }).addTo(map).bindTooltip('Google Maps route via Arnhem · Nijmegen · Venlo · Landau · Strasbourg (710km)', { sticky: true });
 
   // ── Deviation from direct route polyline ──────────────────────────────
   const KM_LAT = 111.0;
@@ -290,6 +284,9 @@
   allStops.forEach(stop => {
     const { km, foot } = deviationFromRoute(stop.lat, stop.lon);
     stop.deviation = km;
+    // Extra driving time: detour there and back at ~100km/h
+    const extraMin = Math.round(km * 2 / 100 * 60);
+    stop.extraTime = extraMin < 1 ? 'on route' : `~${extraMin} min extra`;
     const color = stop.type === 'planned' ? '#34C759' : '#FF9500';
     L.polyline([[stop.lat, stop.lon], [foot.lat, foot.lon]], {
       color, weight: 1.5, opacity: 0.7, dashArray: '4 4'
@@ -334,7 +331,7 @@
         <div class="popup-name">${stop.name}</div>
         <div class="popup-road">${stop.road}</div>
         ${stop.time ? `<div class="popup-road" style="color:#007AFF;font-weight:600;">${stop.time}</div>` : ''}
-        ${stop.deviation != null ? `<div class="popup-road" style="color:#8e8e93;">↗ ${stop.deviation} km off direct path</div>` : ''}
+        ${stop.deviation != null ? `<div class="popup-road" style="color:#8e8e93;">↗ ${stop.deviation} km off route · ${stop.extraTime}</div>` : ''}
         <div class="popup-facilities">${stop.facilities}</div>
         ${navLinks(stop)}
       </div>`;
@@ -342,12 +339,12 @@
 
   // ── Place markers ─────────────────────────────────────────────────────
 
-  L.marker([52.359, 4.617], { icon: startIcon })
-    .bindPopup('<div class="popup-inner"><div class="popup-name">Heemstede</div><div class="popup-road">Start · 9:00am</div></div>')
+  L.marker([52.361, 4.606], { icon: startIcon })
+    .bindPopup('<div class="popup-inner"><div class="popup-name">23 Schollevaarlaan</div><div class="popup-road">2106DB Heemstede · Start · 9:00am</div></div>')
     .addTo(map);
 
-  L.marker([48.079, 7.359], { icon: endIcon })
-    .bindPopup('<div class="popup-inner"><div class="popup-name">6 Rue Schickele</div><div class="popup-road">Colmar, 68000 · Destination</div></div>')
+  L.marker([48.075, 7.366], { icon: endIcon })
+    .bindPopup('<div class="popup-inner"><div class="popup-name">6 Rue Schickelé</div><div class="popup-road">68000 Colmar · Destination</div></div>')
     .addTo(map);
 
   const markerRefs = allStops.map(stop => {
@@ -373,7 +370,7 @@
           <div class="stop-card-name">${stop.name}</div>
           <div class="stop-card-sub">${stop.road}</div>
           ${stop.time ? `<div class="stop-card-sub" style="color:#007AFF;font-weight:600;">${stop.time}</div>` : ''}
-          ${stop.deviation != null ? `<div class="stop-card-sub" style="color:#8e8e93;">↗ ${stop.deviation} km off direct path</div>` : ''}
+          ${stop.deviation != null ? `<div class="stop-card-sub" style="color:#8e8e93;">↗ ${stop.deviation} km off route · ${stop.extraTime}</div>` : ''}
           <div class="stop-card-sub">${stop.facilities}</div>
           <div class="stop-card-nav">
             <a href="${wazeUrl}" target="_blank" style="background:#09CBE5;color:white;" class="nav-btn">Waze</a>
